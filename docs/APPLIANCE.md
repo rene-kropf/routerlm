@@ -1,0 +1,120 @@
+<!--
+APPLIANCE.md v0.4 — 2026-10-14
+Changelog:
+- v0.4 (2026-10-14): Admin page alerts on an account out of credit (spec v0.4).
+- v0.3 (2026-10-14): Matched to the approved spec: stopping the local engine turns only local-first roles red; a new model takes the old one's place in the list.
+- v0.2 (2026-10-14): Default order (Rene approved): the box is the floor that keeps answering; firewall allows the configured providers; acceptance test unplugs the internet and expects every role to answer.
+- v0.1 (2026-10-14): First draft.
+-->
+
+# The appliance
+
+One box on a shelf in the office. It runs the local models and RouterLM, and Capsule Base beside them if the business uses it. The business owns it outright. When the internet or an AI provider is down, this box keeps answering. Requests marked `local-only` are answered here and nowhere else.
+
+This document describes how to set one up so it runs unattended, comes back by itself after the ordinary things that go wrong, and can be looked after by anyone who reads these documents.
+
+## What runs on it
+
+```
++--------------------------------------------------------------------+
+|  Office-tier box, e.g. Mac mini M5 Pro, 64 GB                      |
+|                                                                    |
+|   Capsule Base (optional)      RouterLM              admin page    |
+|   records + vectors  ------->  roles · failover  ---> status light |
+|   Postgres + pgvector          local floor · log                   |
+|                                  |              \                  |
+|                    inference engine            to cloud providers  |
+|                    (llama-server):             (first on the list  |
+|                    answer model, last on       for hard work)      |
+|                    every list · embeddings                         |
+|                                                                    |
+|   firewall: inbound from the LAN only · outbound to providers only |
++--------------------------------------------------------------------+
+        | wired Ethernet                              | UPS
+     office LAN                                    wall power
+```
+
+Memory on a 64 GB box, as an example:
+
+| Part | Memory |
+|---|---|
+| OS and services | 8 GB |
+| Answer model, 27–35B at Q4 | 17–21 GB |
+| Context for two or three conversations at once | 6–12 GB |
+| Embedding model | 1 GB |
+| Postgres + pgvector (Capsule Base) | 4–8 GB |
+| Headroom | 10 GB or more |
+
+## Software
+
+- **OS:** macOS on a Mac; a current long-term-support Linux release on a PC.
+- **Inference engine:** llama.cpp's `llama-server`, one instance per loaded model, each on its own local port.
+- **RouterLM:** one service ([ARCHITECTURE.md](ARCHITECTURE.md)).
+- **Capsule Base:** its own services, as its spec describes.
+- **Service manager:** launchd on macOS, systemd on Linux. Everything starts at boot and restarts if it exits.
+- **Git on the box:** holds RouterLM's config, the check set and this machine's notes, so every change has a date and a reason.
+
+No container platform, no orchestrator, no vendor agent. Anyone with a terminal can stop, read and restart every piece.
+
+## Network
+
+- **Wired Ethernet**, a fixed address on the LAN, and a name people can type, such as `ai.office.lan`.
+- **Inbound: LAN only.** No port forwarding and no remote-access service open to the internet. If someone looks after the box remotely, they come in over a VPN the owner runs and can switch off.
+- **Outbound: blocked** by the box's own firewall (pf on macOS, nftables on Linux), except for an allow-list.
+  - The list holds the cloud providers in RouterLM's config and time sync (NTP). A box with no cloud providers has nothing else on it.
+  - An update host goes on the list while someone is updating, and comes off afterwards.
+  - The OS itself tries to reach its vendor for updates and services. The allow-list decides whether it can.
+- **The proof:** unplug the office internet. Every role still answers, from its local model, with the light on yellow. That is the acceptance test for the whole idea.
+
+## Power and restarts
+
+- **A small UPS** rides out short outages and shuts the box down cleanly in long ones.
+- **Start after power returns.** Set the box to power on by itself, and every service to start at boot without anyone logging in.
+- **Disk encryption is a trade-off.** With FileVault (macOS) or LUKS (Linux) on, a stolen box gives up nothing. After a power loss, though, the disk waits for a person to unlock it, and nothing answers until they do. With encryption off, the box comes back by itself, and a stolen box gives up everything on it.
+  - If Capsule Base's records live on the box, turn encryption on and name the person who unlocks it after an outage.
+  - Planned restarts can skip the unlock once (`fdesetup authrestart` on macOS).
+
+## Updates
+
+Nothing on the box updates itself.
+
+- **OS and engine:** on a schedule the owner sets (monthly is enough). Open the firewall for the update host, update, close it, run the check set.
+- **Models:** a new model joins as a new target. Download it, pin its hash, run the check set ([ARCHITECTURE.md, section 13](ARCHITECTURE.md#13-the-check-set)), then put it in the old model's place in the role's list. The old model stays on disk until the new one has a week of clean logs.
+- **RouterLM config:** edit it, commit it with a reason, restart the service.
+
+## Admin page
+
+One page on the LAN, behind the admin key:
+
+- the status light for each role, and when each last answered;
+- which target answered the most recent requests, and whether it was local or cloud;
+- requests and tokens per day, per caller;
+- the last check-set run for each target: date, model, and pass / safe-miss / unsafe-miss counts;
+- disk free, memory in use, uptime;
+- alerts: a rejected cloud key, a provider account out of credit, a model file whose hash changed, debug capture switched on.
+
+## Backup and replacement
+
+- **RouterLM holds no business data.** Back up its config, the check set and the logs. They're small; a nightly copy to another machine is enough.
+- **Model weights don't need a backup.** They can be downloaded again, and the pinned hashes prove the new copy is the same file.
+- **Capsule Base's database is the business data.** Back it up as the Capsule Base spec describes. It's the one thing on the box that can't be downloaded again.
+- **If the box dies:** set up a new box, restore the config and the check set, download the pinned weights, restore Capsule Base's data, run the check set, and put it back in service. Downloads take most of the time. An office that can't go a day without it keeps a second box set up and current.
+
+## Acceptance test
+
+Before the box goes into service:
+
+1. **Unplug the office internet.** Every role answers from its local model, the lights turn yellow, and nothing hangs. Plug it back in; the lights return to green after the cooldown.
+2. **Test `local-only`.** Stop every local engine and send a `local-only` request. It fails with a clear error, and the firewall log shows nothing leaving.
+3. **Stop the local engine.** Roles that run locally first (summaries, embeddings) turn red within seconds and their callers get a clear error, not a hang. Roles with a cloud model first stay green. Start the engine again; everything returns to green.
+4. **Pull the power, then restore it.** The box comes back (or waits for the unlock, if encrypted), and every service starts without anyone logging in to start it.
+5. **Run the check set** against every target in every role. Every gate passes.
+6. **Run a full working day of real use**, then read the log: response times, failovers, errors.
+
+## Care
+
+A box like this needs someone. Monthly: apply updates, re-run the check set, read the log for slow answers and failovers, check disk space and the UPS battery. When the business's records change shape, the check set changes with them. A better model, when one ships, goes through the same gate as the first one did.
+
+## Who owns what
+
+The business owns the box, the config, the check set, the keys and the logs. Nothing on it reports to anyone outside. Any competent builder can take over its care from these documents. For one built and set up for you, see [emmausdev.com](https://emmausdev.com).
