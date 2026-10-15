@@ -1,9 +1,8 @@
 <!--
-HARDWARE.md v0.3 — 2026-10-14
-Changelog:
+HARDWARE.md v0.4 — 2026-10-15
+Changelog (latest two; older entries: `git log -- RouterLM/publish/repo/docs/HARDWARE.md`):
+- v0.4 (2026-10-15): One name per thing (Rene): local AI app (was engine), test questions (was check set), cloud models.
 - v0.3 (2026-10-14): Box test ends with a working day on the local model alone, cloud targets off.
-- v0.2 (2026-10-14): Intro states what the box is for: carrying the work alone when the providers can't.
-- v0.1 (2026-10-14): First draft. Prices and model names as of 2026-10-14.
 -->
 
 # Hardware
@@ -16,7 +15,7 @@ How to size the box for the local model, and what that costs today. That model i
 
 1. **Memory decides what fits.** The model's weights, its working memory for each conversation (the KV cache), and everything else on the box have to fit in RAM at the same time.
 2. **Memory bandwidth decides how fast it writes.** Producing each token means reading the model's active weights once.
-3. **Compute decides how fast it reads.** Before the first token appears, the engine processes the whole prompt. For questions that carry thousands of tokens of retrieved records, this is the wait people notice.
+3. **Compute decides how fast it reads.** Before the first token appears, the local AI app processes the whole prompt. For questions that carry thousands of tokens of retrieved records, this is the wait people notice.
 
 CPU core count, SSD speed and network speed barely matter. The SSD only changes how long a model takes to load.
 
@@ -36,9 +35,9 @@ At 4-bit quantization (Q4, the usual choice for local use), weights take roughly
 
 Add to that:
 
-- **Context (KV cache).** It grows with context length and with the number of conversations served at once. Budget 2–8 GB per active 32K-token conversation for a mid-size model; it varies a lot by architecture. The engine prints the real figure when it loads a model.
+- **Context (KV cache).** It grows with context length and with the number of conversations served at once. Budget 2–8 GB per active 32K-token conversation for a mid-size model; it varies a lot by architecture. The local AI app prints the real figure when it loads a model.
 - **An embedding model**: 1–2 GB at most.
-- **Everything else**: the OS, the engine, RouterLM, and anything sharing the box, such as Capsule Base's Postgres. Allow 8–12 GB.
+- **Everything else**: the OS, the local AI app, RouterLM, and anything sharing the box, such as Capsule Base's Postgres. Allow 8–12 GB.
 
 On a Mac, the GPU can use only part of unified memory by default, roughly two-thirds to three-quarters depending on the machine. The limit can be raised (`sysctl iogpu.wired_limit_mb`), at the expense of everything else on the box.
 
@@ -54,7 +53,7 @@ Upper bound: **tokens per second ≈ memory bandwidth ÷ bytes read per token.**
 | 35B MoE, ~3B active | ~2 GB | doesn't fit in 32 GB | ≤ 150 | ≤ 300 |
 | 120B MoE, ~5B active | ~3–4 GB | doesn't fit | doesn't fit in 64 GB | ≤ 150–200 |
 
-These are ceilings. Real engines land at roughly half to three-quarters of them. Published tests of a 120B MoE model on 256–273 GB/s machines measured about 33–38 tokens per second with llama.cpp.
+These are ceilings. Real local AI apps land at roughly half to three-quarters of them. Published tests of a 120B MoE model on 256–273 GB/s machines measured about 33–38 tokens per second with llama.cpp.
 
 For reference, a person reads at roughly 5–8 tokens per second. Anything above 10 keeps ahead of the reader.
 
@@ -84,7 +83,7 @@ As of 2026-10-14. Mac prices are Apple's configurator prices; the PC prices are 
 ### Other shapes
 
 - **A desktop with a discrete GPU** (24–32 GB of video memory) is fast for any model that fits in video memory and stuck when one doesn't. It draws several hundred watts under load and makes noise. A good fit for a 27B-class model with fast prompt processing; a poor fit for 70B and up.
-- **Linux boxes** run the same engines. llama.cpp supports CUDA, ROCm and Vulkan. Headless Linux suits an appliance well.
+- **Linux boxes** run the same local AI apps. llama.cpp supports CUDA, ROCm and Vulkan. Headless Linux suits an appliance well.
 - **Multi-GPU servers** run the largest open models. That's beyond what an office needs.
 
 ## Models
@@ -95,14 +94,14 @@ As of 2026-10-14. These are examples: names and sizes change monthly, and source
 |---|---|---|
 | Embeddings | nomic-embed-text (768 dimensions), bge-m3, Qwen3-Embedding | Pick one and keep it ([ARCHITECTURE.md, section 9](ARCHITECTURE.md#9-embeddings)) |
 | Small tier | gpt-oss-20b, Gemma 4 12B | OpenAI states gpt-oss-20b runs within 16 GB in its native 4-bit format |
-| Office tier | Qwen3.6 27B (dense), Qwen3.6-35B-A3B (MoE), Gemma 4 31B | The MoE writes several times faster. Quality differences show up only on your own questions, so run the check set on both. |
+| Office tier | Qwen3.6 27B (dense), Qwen3.6-35B-A3B (MoE), Gemma 4 31B | The MoE writes several times faster. Quality differences show up only on your own questions, so run the test questions on both. |
 | Large tier | gpt-oss-120b (MoE) | About 63 GB in its native 4-bit format; fits 128 GB with room for a second model |
 
-## Engines
+## Local AI apps
 
 All of these serve the OpenAI-compatible API, so RouterLM works with any of them.
 
-- **llama.cpp (`llama-server`)**: MIT-licensed, runs on Mac, Linux and Windows, headless, scriptable, small. The reference engine for the appliance.
+- **llama.cpp (`llama-server`)**: MIT-licensed, runs on Mac, Linux and Windows, headless, scriptable, small. The reference local AI app for the appliance.
 - **LM Studio, Ollama**: friendlier on a desk and good for trying models.
 - **MLX-based servers**: fast on Apple Silicon.
 - **vLLM, SGLang**: built for NVIDIA servers with many users at once.
@@ -114,8 +113,8 @@ The numbers above narrow the choice. This test makes it:
 1. Load the candidate answer model.
 2. Send a real prompt: your system prompt, a typical set of retrieved records, and one question. Measure time to first token and tokens per second.
 3. Send two at once, as two people would. Measure again.
-4. Run the check set ([ARCHITECTURE.md, section 13](ARCHITECTURE.md#13-the-check-set)).
-5. Switch the cloud targets off and run a full working day of real use on the local model alone, then read the log.
+4. Run the test questions ([ARCHITECTURE.md, section 13](ARCHITECTURE.md#13-test-questions)).
+5. Switch the cloud models off and run a full working day of real use on the local model alone, then read the log.
 
 If the box gets through step 5 with the answer model you need, it's the right size. That day is the one it exists for.
 

@@ -1,0 +1,42 @@
+{
+  "_version": "config.example.json v0.4 — 2026-10-15: one name per thing (Rene): apps (was callers, their ceiling is now data), models (was targets, key_ref is now api_key), lineups (was roles, each lists its models, #1 first), test_questions_dir (was check_dir). v0.3 — 2026-10-15: no admin key. Replace every key_sha256 with one from `python3 routerlm.py new-key`, set listen to the box's LAN address, and put the cloud API keys in the keychain under the api_key names (or enter them in Settings).",
+  "listen": "10.0.0.20:8080",
+  "cooldown_s": 60,
+  "health_interval_s": 5,
+  "stream_idle_timeout_s": 300,
+  "log_dir": "logs",
+  "test_questions_dir": "test-questions",
+  "debug": false,
+  "apps": {
+    "capsule":    { "key_sha256": "replace-with-key_sha256-from-new-key", "data": "cloud-ok" },
+    "hr-reports": { "key_sha256": "replace-with-key_sha256-from-new-key", "data": "local-only" },
+    "owner-desk": { "key_sha256": "replace-with-key_sha256-from-new-key", "data": "cloud-ok", "concrete_models": true }
+  },
+  "models": [
+    { "id": "cloud-claude", "location": "cloud", "adapter": "anthropic",
+      "base_url": "https://api.anthropic.com/v1", "model": "claude-opus-5-5",
+      "api_key": "keychain:routerlm-anthropic", "max_parallel": 8 },
+    { "id": "cloud-openai", "location": "cloud", "adapter": "openai",
+      "base_url": "https://api.openai.com/v1", "model": "gpt-5.5",
+      "api_key": "keychain:routerlm-openai", "max_parallel": 8 },
+    { "id": "local-qwen27", "location": "local", "adapter": "openai",
+      "base_url": "http://127.0.0.1:8081/v1", "model": "qwen3.6-27b-q4_k_m",
+      "max_parallel": 2, "max_queue": 16 },
+    { "id": "local-embed", "location": "local", "adapter": "openai",
+      "base_url": "http://127.0.0.1:8082/v1", "model": "nomic-embed-text-v2",
+      "max_parallel": 4 }
+  ],
+  "lineups": {
+    "answer":    { "lane": "interactive", "data": "cloud-ok",
+                   "timeout_first_token_s": 20, "max_context": 32768,
+                   "models": ["cloud-claude", "cloud-openai", "local-qwen27"] },
+    "summarize": { "lane": "batch", "data": "cloud-ok",
+                   "timeout_first_token_s": 60, "max_context": 32768,
+                   "models": ["local-qwen27"] },
+    "reason":    { "lane": "interactive", "data": "cloud-ok",
+                   "timeout_first_token_s": 30, "max_context": 65536,
+                   "models": ["cloud-claude", "cloud-openai", "local-qwen27"] },
+    "embed":     { "lane": "batch", "data": "local-only",
+                   "models": ["local-embed"] }
+  }
+}

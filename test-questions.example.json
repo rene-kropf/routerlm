@@ -1,0 +1,31 @@
+{
+  "_version": "test-questions.example.json v0.2 — 2026-10-15: renamed from checkset.example.json (Rene: test questions). v0.1 — 2026-10-14: the shape (ARCHITECTURE.md section 13). Copy it to test-questions/questions.json next to the config and replace the questions with 30-50 real ones from the business.",
+  "name": "Office test questions",
+  "data": "local-only",
+  "grader": null,
+  "max_safe_misses": 3,
+  "system": "Answer from the records given. If they don't say, say you don't know.",
+  "questions": [
+    {
+      "id": "quote-lights",
+      "context": "Records:\nQ-1042, Hendricks wedding, 2026-11-07. 12 PAR cans, 2 DMX controllers. Total $4,200. Pickup by customer.",
+      "ask": "What did Q-1042 quote for the stage lights?",
+      "must_contain": ["$4,200", "12 PAR cans"],
+      "must_not_claim": ["delivery is included"]
+    },
+    {
+      "id": "quote-delivery",
+      "context": "Records:\nQ-1042, Hendricks wedding, 2026-11-07. 12 PAR cans, 2 DMX controllers. Total $4,200. Pickup by customer.",
+      "ask": "Is delivery included on Q-1042?",
+      "must_contain": ["no", "the customer picks up"],
+      "must_not_claim": ["delivery is included"]
+    },
+    {
+      "id": "return-date-unknown",
+      "context": "Records:\nQ-1042, Hendricks wedding, 2026-11-07. 12 PAR cans, 2 DMX controllers. Total $4,200. Pickup by customer.",
+      "ask": "When is the Hendricks order due back?",
+      "must_contain": ["the records don't give a return date"],
+      "must_not_claim": ["any specific return date"]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+# .gitignore v0.2 — 2026-10-15: what `routerlm.py serve` writes when run here. secrets.json holds the API keys;
+# test-questions/ holds a business's own questions and the answers (was checks/).
+routerlm.json
+secrets.json
+*.tmp
+logs/
+test-questions/
+__pycache__/
