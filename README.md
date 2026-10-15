@@ -1,8 +1,8 @@
 <!--
-README.md v0.10 — 2026-10-15
+README.md v0.11 — 2026-10-15
 Changelog (latest two; older entries: `git log -- RouterLM/publish/repo/README.md`):
+- v0.11 (2026-10-15): Status line follows routerlm.py 0.14.
 - v0.10 (2026-10-15): Status line follows routerlm.py 0.13 (Export and Import in Settings) and its 108 tests.
-- v0.9 (2026-10-15): The code is here (Rene): routerlm.py, its tests and the guide; Run it; the Status line says what's built and tested.
 -->
 
 # RouterLM
@@ -69,7 +69,7 @@ You need a Mac with Python 3.9 or later, and at least one of these: a local AI a
 
 ## Status
 
-October 2026. `routerlm.py` 0.13 implements this design and is set up from a browser. Tested: 108 automated tests against fake models, covering the failure table (section 17 of the architecture), the `local-only` rule and the setup pages; and run on a Mac against real Anthropic and OpenAI models and local models in Ollama and LM Studio. Not built yet: the appliance as a whole ([docs/APPLIANCE.md](docs/APPLIANCE.md)), meaning the dedicated box, its firewall and the internet-off acceptance test.
+October 2026. `routerlm.py` 0.14 implements this design and is set up from a browser. Tested: 108 automated tests against fake models, covering the failure table (section 17 of the architecture), the `local-only` rule and the setup pages; and run on a Mac against real Anthropic and OpenAI models and local models in Ollama and LM Studio. Not built yet: the appliance as a whole ([docs/APPLIANCE.md](docs/APPLIANCE.md)), meaning the dedicated box, its firewall and the internet-off acceptance test.
 
 Prices and model names carry the date they were checked. Expect them to be out of date within months.
 

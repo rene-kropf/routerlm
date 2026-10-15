@@ -1,8 +1,8 @@
 <!--
-GUIDE.md v0.10 — 2026-10-15
+GUIDE.md v0.12 — 2026-10-15
 Changelog (latest two; older entries: `git log -- RouterLM/impl/GUIDE.md`):
-- v0.10 (2026-10-15): The settings file's Export and Import buttons (Rene; routerlm.py v0.13).
-- v0.9 (2026-10-15): No short name in the tour (routerlm.py v0.12, Rene's "one better way"): model cards show the name and where it runs; a model already set up is turned away.
+- v0.12 (2026-10-15): No FileMaker examples left: the persona, the Part 1 diagram and the full-web-address line (Rene).
+- v0.11 (2026-10-15): The API key example is `capsule`, not `filemaker`, and the names table no longer lists "a FileMaker script" (Rene).
 Staged copy of RouterLM/impl/GUIDE.md; edit that one and stage again.
 -->
 
@@ -14,7 +14,7 @@ Claude's wording, approved by Rene 2026-10-15. Every label on the screens is wri
 wouldn't know a word, it goes or gets one plain sentence.
 
 1. **The would-be builder (primary).** Uses Claude or ChatGPT every day for work. Has hooked one thing up to an
-   AI model by following a tutorial: a script, a FileMaker button, a small app. Can sign up for an account, copy
+   AI model by following a tutorial: a script or a small app. Can sign up for an account, copy
    an API key and fill in a settings page. Doesn't use the terminal and shouldn't have to; "port", "hash" and
    "JSON" mean nothing to them. The pain: whatever they built goes dead when the provider has an outage, the card
    on the account expires or the internet drops. Wants it running in an afternoon, and wants to know what happens
@@ -43,7 +43,7 @@ One name per thing, and the same name on every screen.
 | **API key** | The code from your account with a model company (Anthropic, OpenAI) that lets RouterLM use its models. One API key covers all of that company's models. Local models need none. An app on the RouterLM Mac needs no API key; RouterLM makes one for an app on another computer. |
 | **Local AI app** | A program that runs models on your own machine: LM Studio, Ollama, llama-server. It runs models; it isn't one. |
 | **Lineup** | Models in order. #1, the Primary, answers; if it can't, #2 does, and so on down. You decide the order and where it ends. You can have more than one. |
-| **App** | A program that sends questions to RouterLM: Capsule, a FileMaker script, a chat window. |
+| **App** | A program that sends questions to RouterLM: Capsule, a script, a chat window. |
 | **Local only** | A lineup or an app marked Local only uses local models only, backups included. Nothing goes to the cloud. |
 | **Test questions** | Questions you write, with the facts each answer must contain, to check a model before you need it. |
 
@@ -63,7 +63,7 @@ It runs on a Mac or a Debian/Ubuntu machine in the office, or on the Mac on your
   your apps                 RouterLM                    your models, in order
   ─────────                 ────────                    ─────────────────────
   Capsule      ──┐                                  ┌─▶ #1 Claude        (cloud)  Primary
-  FileMaker    ──┼──▶  one address, one lineup  ────┼─▶ #2 GPT           (cloud)
+  a script     ──┼──▶  one address, one lineup  ────┼─▶ #2 GPT           (cloud)
   chat window  ──┘                                  └─▶ #3 Qwen 27B      (office Mac)
 ```
 
@@ -206,13 +206,13 @@ settings, where it asks for OpenAI's address (often called the base URL), the mo
 |---|---|
 | Address (base URL) | `http://127.0.0.1:8090/v1` |
 | Model | `answer` |
-| API key | the app's name, such as `filemaker`, or nothing |
+| API key | the app's name, such as `capsule`, or nothing |
 
 The API key box only names the app: the main page lists the app's questions under that name, and with the box
 left blank it shows as "this Mac". An OpenAI key left in the box works too, and shows as "this Mac"; RouterLM
 doesn't use it.
 
-If the app sends its questions to a full web address, as a FileMaker script or a tutorial's code often does
+If the app sends its questions to a full web address, as a script or a tutorial's code often does
 (`https://api.openai.com/v1/chat/completions`), change it to `http://127.0.0.1:8090/v1/chat/completions`. An app
 that only talks to Anthropic's own API needs its OpenAI-style settings instead; most apps and tutorials offer
 both. The app has to run on this same Mac; for apps on other computers, see Apps and General in Part 3.

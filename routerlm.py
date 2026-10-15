@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# routerlm.py v0.13 — 2026-10-15
+# routerlm.py v0.14 — 2026-10-15
 # Changelog (latest two; older entries: `git log -- RouterLM/impl/routerlm.py`):
+# - v0.14 (2026-10-15): The Apps box no longer names "a FileMaker script" as an example app (Rene).
 # - v0.13 (2026-10-15): Export and Import in Settings (Rene: "exports leave the API keys out"): Export downloads the
 #   settings file; Import loads a picked file through the same checks as Save.
-# - v0.12 (2026-10-15): No short name on the screens (Rene: one way, the model's name and where it runs): Add a model
-#   makes it; the same model added twice is refused in plain words; a second API key gets its own entry.
 """RouterLM: one endpoint on the office network in front of every model an office uses.
 
 The spec is docs/ARCHITECTURE.md; "section N" in comments points into it.
@@ -46,7 +45,7 @@ from collections import deque
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-VERSION = "0.13"
+VERSION = "0.14"
 STRICTNESS = {"cloud-ok": 0, "local-only": 1}
 LANES = ("interactive", "batch")
 TIMEOUTS = (socket.timeout, TimeoutError)  # separate classes before Python 3.10
@@ -2758,8 +2757,8 @@ def settings_page(router, note=None, error=None, posted=None, shown_key=None):
            + choose("Which models", "data", WHERE, "cloud-ok")
            + "<label class=check><input type=checkbox name=concrete_models value=1> May ask for a model by name"
            "</label></div>")
-    out.append("<section><h2>Apps</h2><p class=muted>An app sends questions to RouterLM: Capsule, a FileMaker "
-               f"script, a chat window. In the app's settings, put <code>http://{esc(cfg.host)}:{cfg.port}/v1</code> "
+    out.append("<section><h2>Apps</h2><p class=muted>An app sends questions to RouterLM: Capsule, a chat window. "
+               f"In the app's settings, put <code>http://{esc(cfg.host)}:{cfg.port}/v1</code> "
                "as the address and a lineup's name as the model.</p><p class=muted>An app on this Mac needs no API "
                "key. Put its name in the app's API key box, and that's how it shows on the main page; left blank, "
                "it shows as \"this Mac\". To give it settings of its own, add it below under that name. An app on "
