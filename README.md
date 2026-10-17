@@ -1,8 +1,8 @@
 <!--
-README.md v0.11 — 2026-10-15
+README.md v0.12 — 2026-10-17
 Changelog (latest two; older entries: `git log -- RouterLM/publish/repo/README.md`):
+- v0.12 (2026-10-17): Run it is one pasted line (install.sh) that starts RouterLM with the Mac; Linux keeps the start line.
 - v0.11 (2026-10-15): Status line follows routerlm.py 0.14.
-- v0.10 (2026-10-15): Status line follows routerlm.py 0.13 (Export and Import in Settings) and its 108 tests.
 -->
 
 # RouterLM
@@ -45,18 +45,19 @@ The two are separate on purpose. Capsule Base doesn't require RouterLM, and Rout
 
 ## Run it
 
-You need a Mac with Python 3.9 or later, and at least one of these: a local AI app running a model (LM Studio, Ollama or llama-server), or an API key from Anthropic or OpenAI.
+You need a Mac, and at least one of these: a local AI app running a model (LM Studio, Ollama or llama-server), or an API key from Anthropic or OpenAI.
 
-1. On this page, press the green "Code" button, then "Download ZIP". Move the `routerlm-main` folder it unzips to into your home folder.
-2. Open Terminal and start RouterLM:
+1. Open Terminal, paste this line and press Return:
 
    ```bash
-   cd routerlm-main && python3 routerlm.py serve
+   curl -fsSL https://raw.githubusercontent.com/rene-kropf/routerlm/main/install.sh | sh
    ```
 
-3. In a browser on the same Mac, open http://127.0.0.1:8090/. It opens Settings, with no password on the Mac itself.
-4. Under Quick start, pick a model and press "Use it". With only an API key, add it under API keys and press "Use it" in its row.
-5. In your app's settings, put `http://127.0.0.1:8090/v1` as the address (base URL) and `answer` as the model. On the same Mac the app needs no API key: put its name in the API key box, or leave it blank.
+   It puts RouterLM in `routerlm-main` in your home folder, starts it now and whenever the Mac starts, and opens http://127.0.0.1:8090/ in your browser: Settings, with no password on the Mac itself. Paste it again to update; your settings and API keys stay.
+2. Under Quick start, pick a model and press "Use it". With only an API key, add it under API keys and press "Use it" in its row.
+3. In your app's settings, put `http://127.0.0.1:8090/v1` as the address (base URL) and `answer` as the model. On the same Mac the app needs no API key: put its name in the API key box, or leave it blank.
+
+On Linux (Debian or Ubuntu), download the ZIP (green "Code" button), unzip it into your home folder and start it with `cd routerlm-main && python3 routerlm.py serve`.
 
 [docs/GUIDE.md](docs/GUIDE.md) walks through each step and every screen, for people who'd rather not live in a terminal. To run the tests: `python3 -m unittest discover -s tests`.
 
@@ -69,7 +70,7 @@ You need a Mac with Python 3.9 or later, and at least one of these: a local AI a
 
 ## Status
 
-October 2026. `routerlm.py` 0.14 implements this design and is set up from a browser. Tested: 108 automated tests against fake models, covering the failure table (section 17 of the architecture), the `local-only` rule and the setup pages; and run on a Mac against real Anthropic and OpenAI models and local models in Ollama and LM Studio. Not built yet: the appliance as a whole ([docs/APPLIANCE.md](docs/APPLIANCE.md)), meaning the dedicated box, its firewall and the internet-off acceptance test.
+October 2026. `routerlm.py` 0.14 implements this design and is set up from a browser; `install.sh` installs it on a Mac with one pasted line. Tested: 108 automated tests against fake models, covering the failure table (section 17 of the architecture), the `local-only` rule and the setup pages; and run on a Mac against real Anthropic and OpenAI models and local models in Ollama and LM Studio. Not built yet: the appliance as a whole ([docs/APPLIANCE.md](docs/APPLIANCE.md)), meaning the dedicated box, its firewall and the internet-off acceptance test.
 
 Prices and model names carry the date they were checked. Expect them to be out of date within months.
 

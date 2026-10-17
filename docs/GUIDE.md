@@ -1,8 +1,8 @@
 <!--
-GUIDE.md v0.12 — 2026-10-15
+GUIDE.md v0.13 — 2026-10-17
 Changelog (latest two; older entries: `git log -- RouterLM/impl/GUIDE.md`):
+- v0.13 (2026-10-17): Part 2 installs with one pasted line that starts RouterLM with the Mac; update and remove lines; Linux keeps the start line (Rene: "slice 7 is the install line").
 - v0.12 (2026-10-15): No FileMaker examples left: the persona, the Part 1 diagram and the full-web-address line (Rene).
-- v0.11 (2026-10-15): The API key example is `capsule`, not `filemaker`, and the names table no longer lists "a FileMaker script" (Rene).
 Staged copy of RouterLM/impl/GUIDE.md; edit that one and stage again.
 -->
 
@@ -145,42 +145,46 @@ new file; if it passes, update the pin and the model is back at its spot in the 
 
 ## Part 2: Install on macOS
 
-Five steps, from the download to your app's first answer. Terminal comes up once, to start RouterLM; everything
+Three steps, from nothing to your app's first answer. Terminal comes up once, for one pasted line; everything
 after that happens in a browser.
 
 You need a Mac and at least one of these: a local AI app running a model (LM Studio, Ollama or llama-server), or
 an API key from Anthropic or OpenAI.
 
-### 1. Download RouterLM
-
-On github.com/rene-kropf/routerlm, press the green "Code" button, then "Download ZIP". Safari unzips it for you;
-with another browser, double-click the ZIP in Downloads. You get a folder named `routerlm-main`. Move it into
-your home folder, the one with your name on it where Documents and Downloads are (in Finder: Go, Home). RouterLM
-keeps its settings and API keys in that folder.
-
-### 2. Start it
+### 1. Install RouterLM
 
 Open Terminal: press Cmd-Space, type Terminal, press Return. Paste this line and press Return:
 
 ```bash
-cd routerlm-main && python3 routerlm.py serve
+curl -fsSL https://raw.githubusercontent.com/rene-kropf/routerlm/main/install.sh | sh
 ```
 
-RouterLM is written in Python. If this Mac has never run it, a window offers to install the command line
-developer tools, which include Python. Click Install, wait for it to finish, and paste the line again.
+It puts RouterLM in a folder named `routerlm-main` in your home folder, the one with your name on it where
+Documents and Downloads are. RouterLM keeps its settings and API keys in that folder. The line also sets
+RouterLM to start whenever this Mac starts and to start again if it ever stops, then opens it in your browser.
+You can close Terminal now. macOS may show a "Background Items Added" notice: that's RouterLM starting with the
+Mac.
 
-The first time, Terminal says `new config at /Users/you/routerlm-main/routerlm.json; finish setting up in a
-browser`: RouterLM has made its settings file. Every time, it says RouterLM is listening and gives the address
-to open, http://127.0.0.1:8090/. Leave the Terminal window open: RouterLM runs while it's open, and closing it
-stops RouterLM. To start it again later, open Terminal and paste the same line.
+RouterLM is written in Python. If this Mac has never run it, the line says so and a window offers to install the
+command line developer tools, which include Python. Click Install, wait for it to finish, and paste the line
+again.
 
-### 3. Open it
+The page is http://127.0.0.1:8090/. 127.0.0.1 is the address a computer uses for itself, so it opens only on the
+Mac running RouterLM, and there it doesn't ask for a password. With nothing set up yet, it opens Settings with
+Quick start at the top.
 
-In a browser on the same Mac, open http://127.0.0.1:8090/. 127.0.0.1 is the address a computer uses for
-itself, so this works only on the Mac running RouterLM, and there it doesn't ask for a password. With nothing set
-up yet, it opens Settings with Quick start at the top.
+To update RouterLM, paste the same line again; your settings and API keys stay. To remove it, paste this line,
+then put the `routerlm-main` folder in the Trash if you want its settings and API keys gone too:
 
-### 4. Quick start
+```bash
+launchctl bootout gui/$(id -u)/io.github.rene-kropf.routerlm; rm ~/Library/LaunchAgents/io.github.rene-kropf.routerlm.plist
+```
+
+On Linux (Debian or Ubuntu), the line doesn't install anything. Download RouterLM from
+github.com/rene-kropf/routerlm (the green "Code" button, then "Download ZIP"), unzip it into your home folder,
+and start it with `cd routerlm-main && python3 routerlm.py serve`. It runs while that terminal stays open.
+
+### 2. Quick start
 
 Quick start sets up an `answer` lineup for your apps in one step. What you do depends on what you have:
 
@@ -197,7 +201,7 @@ A green box at the top of the page says what to put in your app:
 > needs no API key: put its name in the API key box, and that's how it shows on the main page. The answer
 > lineup: #1 Primary google/gemma-4-31b (LM Studio, local).
 
-### 5. Point your app at RouterLM
+### 3. Point your app at RouterLM
 
 RouterLM takes questions the way OpenAI does, so an app that can use OpenAI can use RouterLM. In the app's
 settings, where it asks for OpenAI's address (often called the base URL), the model and the API key, put:
